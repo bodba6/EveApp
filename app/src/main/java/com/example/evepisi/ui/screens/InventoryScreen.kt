@@ -8,7 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.evepisi.model.DogItem
@@ -17,27 +19,40 @@ import com.example.evepisi.model.DogItem
 fun InventoryScreen(inventory: List<DogItem>, onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = onClose,
-        title = { Text("Inventory") },
-        text = {
-            LazyRow {
-                items(inventory) { item ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(item.iconResId),
-                            contentDescription = item.id,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Text(item.id, fontSize = 12.sp)
-                    }
-                }
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onClose) {
+                Text("Close")
             }
         },
-        confirmButton = {
-            Button(onClick = onClose) {
-                Text("Close")
+        title = { Text("Inventory") },
+        text = {
+            val groupedItems = inventory.groupBy { it.iconResId }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(groupedItems.entries.toList()) { (iconResId, items) ->
+                    Box(modifier = Modifier.size(64.dp)) {
+                        Image(
+                            painter = painterResource(id = iconResId),
+                            contentDescription = "Item",
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        if (items.size > 1) {
+                            Text(
+                                text = "${items.size}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(2.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     )
