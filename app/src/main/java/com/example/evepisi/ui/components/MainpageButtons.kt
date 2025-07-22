@@ -18,7 +18,21 @@ fun InventoryButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(id = R.drawable.icon_toybasket),
             contentDescription = "Inventory",
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(64.dp)
+        )
+    }
+}
+
+@Composable
+fun ChatButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.icon_chat),
+            contentDescription = "Chat with Eve",
+            modifier = Modifier.size(64.dp)
         )
     }
 }

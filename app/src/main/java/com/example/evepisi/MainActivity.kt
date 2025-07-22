@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.example.evepisi.model.DogItem
 import com.example.evepisi.ui.components.InventoryButton
 import com.example.evepisi.ui.screens.InventoryScreen
+import com.example.evepisi.ui.components.ChatButton
+import com.example.evepisi.ui.screens.ChatScreen
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 val contentPadding = 16.dp
@@ -90,6 +92,7 @@ class MainActivity : ComponentActivity() {
 
                 // Inventory state
                 var isInventoryOpen by remember { mutableStateOf(false) }
+                var showChatDialog by remember { mutableStateOf(false) }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
                     Column(
@@ -140,6 +143,8 @@ class MainActivity : ComponentActivity() {
                             InventoryButton(
                                 onClick = { isInventoryOpen = true }
                             )
+                            // Chat button to open chat dialogue
+                            ChatButton(onClick = { showChatDialog = true })
                         }
 
                         // Input field and OK button, displayed conditionally
@@ -221,6 +226,10 @@ class MainActivity : ComponentActivity() {
                         if (isInventoryOpen) {
                             InventoryScreen(inventory = inventory, onClose = { isInventoryOpen = false })
                         }
+                        if (showChatDialog) {
+                            ChatScreen(onDismiss = { showChatDialog = false })
+                        }
+
                     }
                 }
             }
