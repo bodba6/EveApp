@@ -1,7 +1,7 @@
 EveApp is a focused Android utility designed to help dog owners track and celebrate their pet's progress toward being fully house-trained. By turning "days since last accident" into a streak-based system with rewards, it makes the training process more engaging and manageable.
 
 **Features**
-*Progress Tracking:
+* Progress Tracking:
     *Live Counter: View the number of days since the last accident at a glance.
 
     *Accident Logging: Easily record an accident, which resets the primary counter.
