@@ -3,6 +3,7 @@ package com.example.evepisi
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,16 +19,11 @@ import androidx.compose.ui.unit.dp
 import com.example.evepisi.ui.theme.EvePisiTheme
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.unit.sp
-
-// Import other classes
 import com.example.evepisi.model.DogItem
 import com.example.evepisi.ui.components.InventoryButton
 import com.example.evepisi.ui.screens.InventoryScreen
-import androidx.compose.runtime.snapshots.SnapshotStateList
 
 val contentPadding = 16.dp
 
@@ -46,23 +42,22 @@ class MainActivity : ComponentActivity() {
                         prefs.getString("last_pisi_date", null)?.let { LocalDate.parse(it) }
                     )
                 }
+                
                 var daysSince by remember {
                     mutableStateOf(
                         lastDate?.let { ChronoUnit.DAYS.between(it, today).toInt() } ?: 0
                     )
                 }
 
-                // Initialize inventory with persistent items and then add dynamic ones
                 val inventory: SnapshotStateList<DogItem> = remember { mutableStateListOf() }
 
-                // Logic to add new items based on daysSince
                 LaunchedEffect(daysSince) {
                     val newItems = mutableListOf<DogItem>()
-
+                    
                     if (daysSince != 0 && daysSince % 3 == 0) {
-                        // Correctly passing id, name, and iconResId
                         newItems.add(DogItem(id = "treat_${daysSince}", iconResId = R.drawable.icon_treat))
                     }
+                    
                     if (daysSince != 0 && daysSince % 5 == 0) {
                         val randomItems = listOf(
                             DogItem(id = "ball_${daysSince}", iconResId = R.drawable.icon_ball),
@@ -73,7 +68,6 @@ class MainActivity : ComponentActivity() {
                     }
 
                     newItems.forEach { item ->
-                        // Add item only if it's not already in the inventory (by ID to avoid duplicates)
                         if (inventory.none { it.id == item.id }) {
                             inventory.add(item)
                         }
@@ -82,13 +76,13 @@ class MainActivity : ComponentActivity() {
 
                 var mode by remember { mutableStateOf("None") }
                 var inputText by remember { mutableStateOf("") }
+                
                 val displayText = if (daysSince == 0) {
                     "I had a little accident today 🐾"
                 } else {
                     "It's been $daysSince day(s) since I peed inside!"
                 }
 
-                // Inventory state
                 var isInventoryOpen by remember { mutableStateOf(false) }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
@@ -98,15 +92,12 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(contentPadding),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(
-                            contentPadding,
-                            Alignment.CenterVertically
-                        )
+                        verticalArrangement = Arrangement.spacedBy(contentPadding, Alignment.CenterVertically)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribute items
+                            horizontalArrangement = Arrangement.SpaceBetween 
                         ) {
                             var expanded by remember { mutableStateOf(false) }
 
@@ -136,13 +127,9 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            // Inventory button now correctly calls its onClick
-                            InventoryButton(
-                                onClick = { isInventoryOpen = true }
-                            )
+                            InventoryButton(onClick = { isInventoryOpen = true })
                         }
 
-                        // Input field and OK button, displayed conditionally
                         if (mode != "None") {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -151,9 +138,7 @@ class MainActivity : ComponentActivity() {
                                 OutlinedTextField(
                                     value = inputText,
                                     onValueChange = { inputText = it },
-                                    label = {
-                                        Text(if (mode == "date") "YYYY-MM-DD" else "Days")
-                                    },
+                                    label = { Text(if (mode == "date") "YYYY-MM-DD" else "Days") },
                                     modifier = Modifier.weight(1f)
                                 )
 
@@ -166,9 +151,9 @@ class MainActivity : ComponentActivity() {
                                             val days = ChronoUnit.DAYS.between(date, LocalDate.now()).toInt()
                                             daysSince = days.coerceAtLeast(0)
                                             prefs.edit().putString("last_pisi_date", date.toString()).apply()
-                                            lastDate = date // Update lastDate as well
-                                        } catch (_: Exception) {
-                                            // Invalid input – ignore
+                                            lastDate = date 
+                                        } catch (e: Exception) {
+                                            Log.e("EveApp", "Failed to parse: $inputText") 
                                         }
                                     } else if (mode == "days") {
                                         val inputDays = inputText.toIntOrNull()
@@ -187,12 +172,11 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(contentPadding))
 
-                        // Kutyafej
                         Image(
                             painter = painterResource(
                                 id = if (daysSince == 0) R.drawable.dog_lying else R.drawable.dog_sitting
                             ),
-                            contentDescription = "Eve's face",
+                            contentDescription = null,
                             modifier = Modifier.size(200.dp)
                         )
 
@@ -202,6 +186,7 @@ class MainActivity : ComponentActivity() {
                             textAlign = TextAlign.Center
                         )
 
+                        // TODO: Implement a confirmation dialog so the user doesn't reset by accident
                         Button(onClick = {
                             val newDate = today.toString()
                             prefs.edit().putString("last_pisi_date", newDate).apply()
@@ -211,13 +196,10 @@ class MainActivity : ComponentActivity() {
                             Text("Oops, I peed 😳")
                         }
 
-                        Button(onClick = {
-                            daysSince += 1
-                        }) {
+                        Button(onClick = { daysSince += 1 }) {
                             Text("Increase days (Test)")
                         }
 
-                        // Inventory screen dialog - now passing the dynamically updated 'inventory'
                         if (isInventoryOpen) {
                             InventoryScreen(inventory = inventory, onClose = { isInventoryOpen = false })
                         }
